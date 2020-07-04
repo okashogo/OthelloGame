@@ -22,19 +22,20 @@ window.onload = () => {
     box.addEventListener('click', (e) => {
       if (e.target.classList.contains('black-stone') || e.target.classList.contains('white-stone')){
         console.log("aaa");
+        alert('すでに石がある場所には置けません。');
         return;
       }
       let getId = e.target.getAttribute("id");
       let getRow = Number(getId)/10 | 0;
       let getColumn = Number(getId)%10;
 
-      judgeNorth(getRow, getColumn, nowStone);
-      //judgeWest(getRow, getColumn, nowStone);
-      //judgeEast(getRow, getColumn, nowStone);
-      //judgeSouth(getRow, getColumn, nowStone);
-
-      e.target.classList.add(nowStone);
-      nowStone = reverceStone(nowStone);
+      if (judgeNorth(getRow, getColumn, nowStone)){
+        e.target.classList.add(nowStone);
+        nowStone = reverceStone(nowStone);
+      }
+      else{
+        alert('ここには置けません。');
+      }
     })
   })
 }
@@ -60,18 +61,30 @@ const changeStone = (id) => {
 }
 
 const judgeNorth = (row, column, nowStone) => {
+  setJudge = 0
   for (ii = -1; ii <= 1; ii++) {
     for (jj = -1; jj <= 1; jj++) {
       if(!(ii == 0 && jj == 0)){
         rowShift = row
         columnShift = column
         jud = true;
+        result = []
         while(jud){
           rowShift += ii
           columnShift += jj
           id = String(rowShift) + String(columnShift)
           if(document.getElementById(id) != null){
-            console.log(String(ii) + String(jj))
+            if(document.getElementById(id).classList.contains(reverceStone(nowStone))){
+              result.push(id);
+            }
+            else if(document.getElementById(id).classList.contains(nowStone)){
+              deprive(result);
+              setJudge += result.length;
+              break;
+            }
+            else{
+              break;
+            }
           }
           else{
             jud = false;
@@ -80,58 +93,8 @@ const judgeNorth = (row, column, nowStone) => {
       }
     }
   }
-   // result = []
-   // for (i = row -1; i>0; i--){
-   //   id = String(i) + String(column)
-   //   if(document.getElementById(id).classList.contains(reverceStone(nowStone))){
-   //     result.push(id);
-   //   }
-   //   else if(document.getElementById(String(i) +String(column)).classList.contains(nowStone)){
-   //     deprive(result);
-   //     break;
-   //   }
-   // }
-   //
-   // result = []
-   // for (i = row  + 1; i<=8; i++){
-   //   id = String(i) + String(column)
-   //   if(document.getElementById(id).classList.contains(reverceStone(nowStone))){
-   //     result.push(id);
-   //   }
-   //   else if(document.getElementById(String(i) +String(column)).classList.contains(nowStone)){
-   //     deprive(result);
-   //     break;
-   //   }
-   // }
-   //
-   // result = []
-   // for (i = column  - 1; i>0; i--){
-   //   id = String(row) + String(i)
-   //   if(document.getElementById(id).classList.contains(reverceStone(nowStone))){
-   //     result.push(id);
-   //   }
-   //   else if(document.getElementById(String(row) +String(i)).classList.contains(nowStone)){
-   //     deprive(result);
-   //     break;
-   //   }
-   // }
-   //
-   // result = []
-   // for (i = column  + 1; i<=8; i++){
-   //   id = String(row) + String(i)
-   //   if(document.getElementById(id).classList.contains(reverceStone(nowStone))){
-   //     result.push(id);
-   //   }
-   //   else if(document.getElementById(String(row) +String(i)).classList.contains(nowStone)){
-   //     deprive(result);
-   //     break;
-   //   }
-   // }
 
-
-
-
-  return 0
+  return setJudge
 }
 
 const deprive = (result) => {
