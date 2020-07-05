@@ -1,4 +1,35 @@
 console.log('hello');
+var firebaseConfig = {
+    apiKey: "AIzaSyCQwtJNcOqFbj1BftpmcnFeH-MN5JpRdjY",
+    authDomain: "othellogame-ef760.firebaseapp.com",
+    databaseURL: "https://othellogame-ef760.firebaseio.com",
+    projectId: "othellogame-ef760",
+    storageBucket: "othellogame-ef760.appspot.com",
+    messagingSenderId: "59780453577",
+    appId: "1:59780453577:web:e6094f34db81a8cc626918",
+    measurementId: "G-EDBZG9EX0Q"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+var collection = db.collection('message');
+// collection.add({
+//   message: 'test'
+// })
+// .then(doc => {
+//   console.log(doc.id + ' added!');
+// })
+// .catch(error => {
+//   console.log(error)
+// })
+var messages = document.getElementById("messages");
+collection.orderBy('created_at').get().then(function (snapshot) {
+    snapshot.forEach(function (doc) {
+        var li = document.createElement('li');
+        li.textContent = doc.data().id + ' ' + doc.data().stones + ' ' + doc.data().created_at;
+        messages.appendChild(li);
+    });
+});
 window.onload = function () {
     var nowStone = 'black-stone';
     for (var row = 1; row <= 8; row++) {
@@ -20,12 +51,21 @@ window.onload = function () {
             var getRow = Number(getId) / 10 | 0;
             var getColumn = Number(getId) % 10;
             if (judgeNorth(getRow, getColumn, nowStone)) {
+                collection.add({
+                    stones: nowStone,
+                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    id: getId
+                })
+                    .then(function (doc) {
+                    console.log(doc.id + ' added!');
+                })["catch"](function (error) {
+                    console.log(error);
+                });
                 e.target.classList.add(nowStone);
                 nowStone = reverceStone(nowStone);
             }
             else {
                 alert('ここには置けません。');
-                return;
             }
         });
     });
