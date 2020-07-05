@@ -13,21 +13,14 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 var collection = db.collection('message');
-// collection.add({
-//   message: 'test'
-// })
-// .then(doc => {
-//   console.log(doc.id + ' added!');
-// })
-// .catch(error => {
-//   console.log(error)
-// })
 var messages = document.getElementById("messages");
-collection.orderBy('created_at').get().then(function (snapshot) {
-    snapshot.forEach(function (doc) {
-        var li = document.createElement('li');
-        li.textContent = doc.data().id + ' ' + doc.data().stones + ' ' + doc.data().created_at;
-        messages.appendChild(li);
+collection.orderBy('created_at').onSnapshot(function (snapshot) {
+    snapshot.docChanges().forEach(function (change) {
+        if (change.type === 'added') {
+            var li = document.createElement('li');
+            li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().created_at;
+            messages.appendChild(li);
+        }
     });
 });
 window.onload = function () {
@@ -66,6 +59,25 @@ window.onload = function () {
             }
             else {
                 alert('ここには置けません。');
+            }
+        });
+    });
+    // DB に add されたら、それを反映させる。
+    collection.orderBy('created_at').onSnapshot(function (snapshot) {
+        snapshot.docChanges().forEach(function (change) {
+            if (change.type === 'added') {
+                // change.doc.data().id
+                var pullRow = Number(change.doc.data().id) / 10 | 0;
+                var pullColumn = Number(change.doc.data().id) % 10;
+                if (document.getElementById(change.doc.data().id).classList.contains('black-stone') || document.getElementById(change.doc.data().id).classList.contains('white-stone')) {
+                    return;
+                }
+                judgeNorth(pullRow, pullColumn, change.doc.data().stones);
+                // document.getElementById(change.doc.data().id).classList.add(change.doc.data().stone);
+                document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
+                console.log(change.doc.data().stones);
+                nowStone = reverceStone(nowStone);
+                console.log(nowStone);
             }
         });
     });

@@ -17,23 +17,15 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const collection = db.collection('message');
 
-// collection.add({
-//   message: 'test'
-// })
-// .then(doc => {
-//   console.log(doc.id + ' added!');
-// })
-// .catch(error => {
-//   console.log(error)
-// })
-
 var messages = document.getElementById("messages");
 
-collection.orderBy('created_at').get().then(snapshot => {
-  snapshot.forEach(doc => {
+collection.orderBy('created_at').onSnapshot(snapshot => {
+  snapshot.docChanges().forEach(change => {
+    if(change.type === 'added'){
       const li = document.createElement('li');
-      li.textContent = doc.data().id + ' ' + doc.data().stones + ' ' + doc.data().created_at;
+      li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().created_at;
       messages.appendChild(li);
+    }
   });
 });
 
@@ -91,7 +83,30 @@ window.onload = () => {
       }
     })
   })
+
+  // DB に add されたら、それを反映させる。
+
+  collection.orderBy('created_at').onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if(change.type === 'added'){
+        // change.doc.data().id
+        var pullRow:number = Number(change.doc.data().id) / 10 | 0;
+        var pullColumn:number = Number(change.doc.data().id) % 10;
+
+        if (document.getElementById(change.doc.data().id).classList.contains('black-stone') || document.getElementById(change.doc.data().id).classList.contains('white-stone')){
+          return;
+        }
+        judgeNorth(pullRow, pullColumn, change.doc.data().stones);
+        document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
+        console.log(change.doc.data().stones);
+        nowStone = reverceStone(nowStone);
+        console.log(nowStone);
+      }
+    });
+  });
+
 }
+
 
 const reverceStone = (nowStone) => {
   if (nowStone == 'black-stone'){
