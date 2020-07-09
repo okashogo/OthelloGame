@@ -54,6 +54,7 @@ auth.onAuthStateChanged(function (user) {
 });
 window.onload = function () {
     var nowStone = 'B';
+    var setJudge = 0;
     for (var row = 1; row <= 8; row++) {
         for (var column = 1; column <= 8; column++) {
             document.querySelector('.boxes').insertAdjacentHTML('beforeend', '<div class="box" id="' + row + column + '"></div>');
@@ -63,6 +64,7 @@ window.onload = function () {
     document.getElementById('55').classList.add('B');
     document.getElementById('45').classList.add('W');
     document.getElementById('54').classList.add('W');
+    canPut(nowStone);
     Array.from(document.getElementsByClassName('box')).forEach(function (box) {
         box.addEventListener('click', function (e) {
             if (document.getElementById('yourTurn').classList.contains('hidden')) {
@@ -76,7 +78,18 @@ window.onload = function () {
             var getId = e.target.getAttribute("id");
             var getRow = Number(getId) / 10 | 0;
             var getColumn = Number(getId) % 10;
-            if (judge(getRow, getColumn, nowStone)) {
+            setJudge = 0;
+            var result = [];
+            for (var ii = -1; ii <= 1; ii++) {
+                for (var jj = -1; jj <= 1; jj++) {
+                    if (!(ii == 0 && jj == 0)) {
+                        result = judge(getRow, getColumn, nowStone, ii, jj);
+                        deprive(result);
+                        setJudge += result.length;
+                    }
+                }
+            }
+            if (setJudge > 0) {
                 collection.add({
                     stones: nowStone,
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -92,10 +105,19 @@ window.onload = function () {
                 nowStone = reverceStone(nowStone);
                 document.getElementById('enemyTurn').classList.remove('hidden');
                 document.getElementById('yourTurn').classList.add('hidden');
+                if (canPut(nowStone) == 0) {
+                    document.getElementById('enemyTurn').classList.add('hidden');
+                    document.getElementById('yourTurn').classList.remove('hidden');
+                    nowStone = reverceStone(nowStone);
+                    if (canPut(nowStone) == 0) {
+                        console.log("試合終了です。");
+                    }
+                }
             }
             else {
                 alert('ここには置けません。');
             }
+            removeCanPut();
         });
     });
     // DB に add されたら、それを反映させる。
@@ -108,20 +130,44 @@ window.onload = function () {
                 if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {
                     return;
                 }
-                judge(pullRow, pullColumn, change.doc.data().stones);
+                setJudge = 0;
+                var result = [];
+                for (var ii = -1; ii <= 1; ii++) {
+                    for (var jj = -1; jj <= 1; jj++) {
+                        if (!(ii == 0 && jj == 0)) {
+                            result = judge(pullRow, pullColumn, change.doc.data().stones, ii, jj);
+                            deprive(result);
+                            setJudge += result.length;
+                        }
+                    }
+                }
                 document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
                 nowStone = reverceStone(nowStone);
                 if (loginUser.uid == change.doc.data().uid) {
                     document.getElementById('yourTurn').classList.add('hidden');
                     document.getElementById('enemyTurn').classList.remove('hidden');
+                    removeCanPut();
+                    if (canPut(nowStone) == 0) {
+                        document.getElementById('enemyTurn').classList.add('hidden');
+                        document.getElementById('yourTurn').classList.remove('hidden');
+                        nowStone = reverceStone(nowStone);
+                        if (canPut(nowStone) == 0) {
+                            console.log("試合終了です。");
+                        }
+                    }
                     return;
                 }
                 else {
                     document.getElementById('enemyTurn').classList.add('hidden');
                     document.getElementById('yourTurn').classList.remove('hidden');
+                    if (canPut(nowStone) == 0) {
+                        alert('あなたはパスです。');
+                        nowStone = reverceStone(nowStone);
+                        document.getElementById('yourTurn').classList.add('hidden');
+                        document.getElementById('enemyTurn').classList.remove('hidden');
+                    }
                     return;
                 }
-                console.log(change.doc.data().uid);
             }
         });
     });
@@ -144,43 +190,73 @@ var changeStone = function (id) {
         document.getElementById(id).classList.add('B');
     }
 };
-var judge = function (row, column, nowStone) {
-    var setJudge = 0;
-    for (var ii = -1; ii <= 1; ii++) {
-        for (var jj = -1; jj <= 1; jj++) {
-            if (!(ii == 0 && jj == 0)) {
-                var rowShift = row;
-                var columnShift = column;
-                var jud = true;
-                var result = [];
-                while (jud) {
-                    rowShift += ii;
-                    columnShift += jj;
-                    var id = String(rowShift) + String(columnShift);
-                    if (document.getElementById(id) != null) {
-                        if (document.getElementById(id).classList.contains(reverceStone(nowStone))) {
-                            result.push(id);
-                        }
-                        else if (document.getElementById(id).classList.contains(nowStone)) {
-                            deprive(result);
-                            setJudge += result.length;
-                            break;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    else {
-                        jud = false;
-                    }
-                }
+var judge = function (row, column, nowStone, ii, jj) {
+    var rowShift = row;
+    var columnShift = column;
+    var jud = true;
+    var result = [];
+    while (jud) {
+        rowShift += ii;
+        columnShift += jj;
+        var id = String(rowShift) + String(columnShift);
+        if (document.getElementById(id) != null) {
+            if (document.getElementById(id).classList.contains(reverceStone(nowStone))) {
+                result.push(id);
+            }
+            else if (document.getElementById(id).classList.contains(nowStone)) {
+                return result;
+            }
+            else {
+                break;
             }
         }
+        else {
+            jud = false;
+        }
     }
-    return setJudge;
+    return [];
 };
 var deprive = function (result) {
     for (var i = 0; i < result.length; i++) {
         changeStone(result[i]);
+    }
+};
+var canPut = function (nowStone) {
+    var allConut = 0;
+    var setJudge = 0;
+    var result = [];
+    for (var i = 1; i <= 8; i++) {
+        for (var j = 1; j <= 8; j++) {
+            allConut += setJudge;
+            setJudge = 0;
+            result = [];
+            var id = String(i) + String(j);
+            document.getElementById(id).classList.remove('canPut');
+            for (var ii = -1; ii <= 1; ii++) {
+                for (var jj = -1; jj <= 1; jj++) {
+                    if (!(ii == 0 && jj == 0)) {
+                        result = judge(i, j, nowStone, ii, jj);
+                        setJudge += result.length;
+                    }
+                }
+            }
+            if (document.getElementById(id).classList.contains('B') || document.getElementById(id).classList.contains('W')) {
+                setJudge = 0;
+            }
+            if (setJudge > 0) {
+                document.getElementById(id).classList.add('canPut');
+            }
+        }
+    }
+    return allConut;
+};
+var removeCanPut = function () {
+    var setJudge = 0;
+    var result = [];
+    for (var i = 1; i <= 8; i++) {
+        for (var j = 1; j <= 8; j++) {
+            var id = String(i) + String(j);
+            document.getElementById(id).classList.remove('canPut');
+        }
     }
 };

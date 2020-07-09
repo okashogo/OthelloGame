@@ -33,3 +33,7 @@
 .hidden {
   display: none;
 }
+
+.canPut {
+  background-color: red;
+}
