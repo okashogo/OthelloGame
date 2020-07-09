@@ -215,7 +215,7 @@ window.onload = () => {
 }
 
 
-const reverceStone = (nowStone) => {
+const reverceStone = function(nowStone:string):string {
   if (nowStone == 'B') {
     return 'W'
   }
