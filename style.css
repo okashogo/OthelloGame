@@ -9,8 +9,8 @@
   background-color: green;
 }
 
-.black-stone::after ,
-.white-stone::after {
+.B::after ,
+.W::after {
   content: '';
   display: block;
   height: 80%;
@@ -21,12 +21,12 @@
 }
 
 
-.black-stone::after {
+.B::after {
   background-color: black;
 }
 
 
-.white-stone::after {
+.W::after {
   background-color: white;
 }
 

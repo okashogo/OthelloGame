@@ -12,11 +12,12 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-var collection = db.collection('message');
+var collection = db.collection('gameRecord');
+var collection_charenge = db.collection('challenges');
 var auth = firebase.auth();
 var batch = db.batch();
 var loginUser = null;
-var messages = document.getElementById("messages");
+var gameRecords = document.getElementById("gameRecords");
 document.getElementById('login').addEventListener('click', function () {
     auth.signInAnonymously();
 });
@@ -31,7 +32,7 @@ auth.onAuthStateChanged(function (user) {
                 if (change.type === 'added') {
                     var li = document.createElement('li');
                     li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().uid;
-                    messages.appendChild(li);
+                    gameRecords.appendChild(li);
                 }
             });
         });
@@ -40,7 +41,7 @@ auth.onAuthStateChanged(function (user) {
         document.getElementById('logout').classList.remove('hidden');
         document.getElementById('reset').classList.remove('hidden');
         document.getElementById('boxes').classList.remove('hidden');
-        document.getElementById('messages').classList.remove('hidden');
+        document.getElementById('gameRecords').classList.remove('hidden');
         return;
     }
     console.log("logout");
@@ -49,33 +50,33 @@ auth.onAuthStateChanged(function (user) {
     document.getElementById('logout').classList.add('hidden');
     document.getElementById('reset').classList.add('hidden');
     document.getElementById('boxes').classList.add('hidden');
-    document.getElementById('messages').classList.add('hidden');
+    document.getElementById('gameRecords').classList.add('hidden');
 });
 window.onload = function () {
-    var nowStone = 'black-stone';
+    var nowStone = 'B';
     for (var row = 1; row <= 8; row++) {
         for (var column = 1; column <= 8; column++) {
             document.querySelector('.boxes').insertAdjacentHTML('beforeend', '<div class="box" id="' + row + column + '"></div>');
         }
     }
-    document.getElementById('44').classList.add('black-stone');
-    document.getElementById('55').classList.add('black-stone');
-    document.getElementById('45').classList.add('white-stone');
-    document.getElementById('54').classList.add('white-stone');
+    document.getElementById('44').classList.add('B');
+    document.getElementById('55').classList.add('B');
+    document.getElementById('45').classList.add('W');
+    document.getElementById('54').classList.add('W');
     Array.from(document.getElementsByClassName('box')).forEach(function (box) {
         box.addEventListener('click', function (e) {
             if (document.getElementById('yourTurn').classList.contains('hidden')) {
                 alert('相手の番です。');
                 return;
             }
-            if (e.target.classList.contains('black-stone') || e.target.classList.contains('white-stone')) {
+            if (e.target.classList.contains('B') || e.target.classList.contains('W')) {
                 alert('すでに石がある場所には置けません。');
                 return;
             }
             var getId = e.target.getAttribute("id");
             var getRow = Number(getId) / 10 | 0;
             var getColumn = Number(getId) % 10;
-            if (judgeNorth(getRow, getColumn, nowStone)) {
+            if (judge(getRow, getColumn, nowStone)) {
                 collection.add({
                     stones: nowStone,
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -104,10 +105,10 @@ window.onload = function () {
                 // change.doc.data().id
                 var pullRow = Number(change.doc.data().id) / 10 | 0;
                 var pullColumn = Number(change.doc.data().id) % 10;
-                if (document.getElementById(change.doc.data().id).classList.contains('black-stone') || document.getElementById(change.doc.data().id).classList.contains('white-stone')) {
+                if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {
                     return;
                 }
-                judgeNorth(pullRow, pullColumn, change.doc.data().stones);
+                judge(pullRow, pullColumn, change.doc.data().stones);
                 document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
                 nowStone = reverceStone(nowStone);
                 if (loginUser.uid == change.doc.data().uid) {
@@ -120,54 +121,30 @@ window.onload = function () {
                     document.getElementById('yourTurn').classList.remove('hidden');
                     return;
                 }
-                // if (loginUser.uid == change.doc.data().uid){
-                //   console.log("次は相手の番です。")
-                // }
-                // else{
-                //   console.log("次は相手の番です。")
-                // }
                 console.log(change.doc.data().uid);
             }
         });
     });
-    //   document.getElementById('reset').addEventListener('click', () => {
-    //     // console.log("aaa");
-    //     // collection.docs.forEach(doc => {
-    //     //     batch.delete(doc.ref);
-    //     //   });
-    //     // // collection.ref().remove();
-    //     // collection.onSnapshot(snapshot => {
-    //     //   snapshot.forEach(doc => {
-    //     //     // doc.remove();
-    //     //     // doc.data().remove())
-    //     //     // console.log(collection.doc().delete());
-    //     //     batch.delete(doc.ref);
-    //     //   });
-    //     // });
-    //     deleteCollection(admin.firestore(), collection, 1);
-    //     // firebase.database().ref().remove();
-    //   });
-    //
 };
 var reverceStone = function (nowStone) {
-    if (nowStone == 'black-stone') {
-        return 'white-stone';
+    if (nowStone == 'B') {
+        return 'W';
     }
     else {
-        return 'black-stone';
+        return 'B';
     }
 };
 var changeStone = function (id) {
-    if (document.getElementById(id).classList.contains('black-stone')) {
-        document.getElementById(id).classList.remove('black-stone');
-        document.getElementById(id).classList.add('white-stone');
+    if (document.getElementById(id).classList.contains('B')) {
+        document.getElementById(id).classList.remove('B');
+        document.getElementById(id).classList.add('W');
     }
-    else if (document.getElementById(id).classList.contains('white-stone')) {
-        document.getElementById(id).classList.remove('white-stone');
-        document.getElementById(id).classList.add('black-stone');
+    else if (document.getElementById(id).classList.contains('W')) {
+        document.getElementById(id).classList.remove('W');
+        document.getElementById(id).classList.add('B');
     }
 };
-var judgeNorth = function (row, column, nowStone) {
+var judge = function (row, column, nowStone) {
     var setJudge = 0;
     for (var ii = -1; ii <= 1; ii++) {
         for (var jj = -1; jj <= 1; jj++) {
@@ -206,47 +183,4 @@ var deprive = function (result) {
     for (var i = 0; i < result.length; i++) {
         changeStone(result[i]);
     }
-};
-var admin = require('firebase-admin');
-admin.initializeApp({
-    credential: admin.credential.cert("/path/to/key.json"),
-    databaseURL: 'https://xxxxxxxxxx.firebaseio.com'
-});
-var db2 = admin.firestore();
-//firebaseのサイトにあるコード（少し改修）
-var deleteCollection = function (db2, collectionRef, batchSize) {
-    var query = collectionRef.orderBy('__name__').limit(batchSize);
-    return new Promise(function (resolve, reject) {
-        deleteQueryBatch(db2, query, batchSize, resolve, reject);
-    });
-};
-//削除のメインコード
-var deleteQueryBatch = function (db2, query, batchSize, resolve, reject) {
-    query.get()
-        .then(function (snapshot) {
-        //検索結果が0件なら処理終わり
-        if (snapshot.size == 0) {
-            return 0;
-        }
-        //削除のメイン処理
-        var batch = db2.batch();
-        snapshot.docs.forEach(function (doc) {
-            batch["delete"](doc.ref);
-        });
-        //一旦処理サイズをreturn
-        return batch.commit().then(function () {
-            return snapshot.size;
-        });
-    })
-        .then(function (numDeleted) {
-        //もう対象のデータが0なら処理終わり
-        if (numDeleted == 0) {
-            resolve();
-            return;
-        }
-        //あだあるなら、再度処理
-        process.nextTick(function () {
-            deleteQueryBatch(db2, query, batchSize, resolve, reject);
-        });
-    })["catch"](reject);
 };

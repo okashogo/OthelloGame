@@ -15,12 +15,14 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const collection = db.collection('message');
+const collection = db.collection('gameRecord');
+const collection_charenge = db.collection('challenges');
+
 const auth = firebase.auth();
 const batch = db.batch();
 var loginUser = null;
 
-var messages = document.getElementById("messages");
+var gameRecords = document.getElementById("gameRecords");
 
 document.getElementById('login').addEventListener('click', () => {
   auth.signInAnonymously();
@@ -38,7 +40,7 @@ auth.onAuthStateChanged(user => {
         if(change.type === 'added'){
           const li = document.createElement('li');
           li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().uid;
-          messages.appendChild(li);
+          gameRecords.appendChild(li);
         }
       });
     });
@@ -47,7 +49,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById('logout').classList.remove('hidden');
     document.getElementById('reset').classList.remove('hidden');
     document.getElementById('boxes').classList.remove('hidden');
-    document.getElementById('messages').classList.remove('hidden');
+    document.getElementById('gameRecords').classList.remove('hidden');
     return;
   }
   console.log("logout");
@@ -56,7 +58,7 @@ auth.onAuthStateChanged(user => {
   document.getElementById('logout').classList.add('hidden');
   document.getElementById('reset').classList.add('hidden');
   document.getElementById('boxes').classList.add('hidden');
-  document.getElementById('messages').classList.add('hidden');
+  document.getElementById('gameRecords').classList.add('hidden');
 });
 
 interface ArrayConstructor {
@@ -65,7 +67,7 @@ interface ArrayConstructor {
 
 window.onload = () => {
 
-  let nowStone:string = 'black-stone';
+  let nowStone:string = 'B';
 
   for (let row = 1; row <= 8; row++){
     for (let column = 1; column <= 8; column++){
@@ -76,10 +78,10 @@ window.onload = () => {
     }
   }
 
-  document.getElementById('44').classList.add('black-stone');
-  document.getElementById('55').classList.add('black-stone');
-  document.getElementById('45').classList.add('white-stone');
-  document.getElementById('54').classList.add('white-stone');
+  document.getElementById('44').classList.add('B');
+  document.getElementById('55').classList.add('B');
+  document.getElementById('45').classList.add('W');
+  document.getElementById('54').classList.add('W');
 
   Array.from(document.getElementsByClassName('box')).forEach(box => {
     box.addEventListener('click', (e) => {
@@ -87,7 +89,7 @@ window.onload = () => {
         alert('相手の番です。');
         return;
       }
-      if (e.target.classList.contains('black-stone') || e.target.classList.contains('white-stone')){
+      if (e.target.classList.contains('B') || e.target.classList.contains('W')){
         alert('すでに石がある場所には置けません。');
         return;
       }
@@ -95,7 +97,7 @@ window.onload = () => {
       let getRow = Number(getId)/10 | 0;
       let getColumn = Number(getId)%10;
 
-      if (judgeNorth(getRow, getColumn, nowStone)){
+      if (judge(getRow, getColumn, nowStone)){
 
         collection.add({
           stones: nowStone,
@@ -130,10 +132,10 @@ window.onload = () => {
         var pullRow:number = Number(change.doc.data().id) / 10 | 0;
         var pullColumn:number = Number(change.doc.data().id) % 10;
 
-        if (document.getElementById(change.doc.data().id).classList.contains('black-stone') || document.getElementById(change.doc.data().id).classList.contains('white-stone')){
+        if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')){
           return;
         }
-        judgeNorth(pullRow, pullColumn, change.doc.data().stones);
+        judge(pullRow, pullColumn, change.doc.data().stones);
         document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
         nowStone = reverceStone(nowStone);
         if (loginUser.uid == change.doc.data().uid){
@@ -146,60 +148,34 @@ window.onload = () => {
           document.getElementById('yourTurn').classList.remove('hidden');
           return;
         }
-
-        // if (loginUser.uid == change.doc.data().uid){
-        //   console.log("次は相手の番です。")
-        // }
-        // else{
-        //   console.log("次は相手の番です。")
-        // }
         console.log(change.doc.data().uid);
       }
     });
   });
-
-//   document.getElementById('reset').addEventListener('click', () => {
-//     // console.log("aaa");
-//     // collection.docs.forEach(doc => {
-//     //     batch.delete(doc.ref);
-//     //   });
-//     // // collection.ref().remove();
-//     // collection.onSnapshot(snapshot => {
-//     //   snapshot.forEach(doc => {
-//     //     // doc.remove();
-//     //     // doc.data().remove())
-//     //     // console.log(collection.doc().delete());
-//     //     batch.delete(doc.ref);
-//     //   });
-//     // });
-//     deleteCollection(admin.firestore(), collection, 1);
-//     // firebase.database().ref().remove();
-//   });
-//
 }
 
 
 const reverceStone = (nowStone) => {
-  if (nowStone == 'black-stone'){
-    return 'white-stone'
+  if (nowStone == 'B'){
+    return 'W'
   }
   else{
-    return 'black-stone'
+    return 'B'
    }
 }
 
 const changeStone = (id) => {
-  if(document.getElementById(id).classList.contains('black-stone')) {
-    document.getElementById(id).classList.remove('black-stone')
-    document.getElementById(id).classList.add('white-stone')
+  if(document.getElementById(id).classList.contains('B')) {
+    document.getElementById(id).classList.remove('B')
+    document.getElementById(id).classList.add('W')
   }
-  else if(document.getElementById(id).classList.contains('white-stone')){
-    document.getElementById(id).classList.remove('white-stone')
-    document.getElementById(id).classList.add('black-stone')
+  else if(document.getElementById(id).classList.contains('W')){
+    document.getElementById(id).classList.remove('W')
+    document.getElementById(id).classList.add('B')
   }
 }
 
-const judgeNorth = (row, column, nowStone) => {
+const judge = (row, column, nowStone) => {
   var setJudge:number = 0
   for (var ii = -1; ii <= 1; ii++) {
     for (var jj = -1; jj <= 1; jj++) {
@@ -240,57 +216,4 @@ const deprive = (result) => {
   for (var i = 0; i < result.length; i++){
     changeStone(result[i]);
   }
-}
-
-const admin = require('firebase-admin');
-admin.initializeApp({
-    credential: admin.credential.cert("/path/to/key.json"),
-    databaseURL: 'https://xxxxxxxxxx.firebaseio.com',
-});
-const db2 = admin.firestore();
-
-
-//firebaseのサイトにあるコード（少し改修）
-const deleteCollection = (db2, collectionRef, batchSize) => {
-    const query = collectionRef.orderBy('__name__').limit(batchSize);
-    return new Promise((resolve, reject) => {
-        deleteQueryBatch(db2, query, batchSize, resolve, reject);
-    });
-}
-
-//削除のメインコード
-const deleteQueryBatch = (db2, query, batchSize, resolve, reject) => {
-    query.get()
-        .then((snapshot) => {
-
-             //検索結果が0件なら処理終わり
-            if (snapshot.size == 0) {
-                return 0;
-            }
-
-             //削除のメイン処理
-            const batch = db2.batch();
-            snapshot.docs.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-
-             //一旦処理サイズをreturn
-            return batch.commit().then(() => {
-                return snapshot.size;
-            })
-        })
-        .then((numDeleted) => {
-
-             //もう対象のデータが0なら処理終わり
-            if (numDeleted == 0) {
-                resolve();
-                return;
-            }
-
-             //あだあるなら、再度処理
-            process.nextTick(() => {
-                deleteQueryBatch(db2, query, batchSize, resolve, reject);
-            });
-        })
-        .catch(reject);
 }
