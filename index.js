@@ -12,12 +12,12 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-var collection = db.collection('gameRecord');
+var collection = db.collection('record');
 var collection_charenge = db.collection('challenges');
 var auth = firebase.auth();
 var batch = db.batch();
 var loginUser = null;
-var gameRecords = document.getElementById("gameRecords");
+var records = document.getElementById("records");
 document.getElementById('login').addEventListener('click', function () {
     auth.signInAnonymously();
 });
@@ -32,7 +32,7 @@ auth.onAuthStateChanged(function (user) {
                 if (change.type === 'added') {
                     var li = document.createElement('li');
                     li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().uid;
-                    gameRecords.appendChild(li);
+                    records.appendChild(li);
                 }
             });
         });
@@ -41,7 +41,7 @@ auth.onAuthStateChanged(function (user) {
         document.getElementById('logout').classList.remove('hidden');
         document.getElementById('reset').classList.remove('hidden');
         document.getElementById('boxes').classList.remove('hidden');
-        document.getElementById('gameRecords').classList.remove('hidden');
+        document.getElementById('records').classList.remove('hidden');
         return;
     }
     console.log("logout");
@@ -50,11 +50,11 @@ auth.onAuthStateChanged(function (user) {
     document.getElementById('logout').classList.add('hidden');
     document.getElementById('reset').classList.add('hidden');
     document.getElementById('boxes').classList.add('hidden');
-    document.getElementById('gameRecords').classList.add('hidden');
+    document.getElementById('records').classList.add('hidden');
 });
 window.onload = function () {
     var nowStone = 'B';
-    var setJudge = 0;
+    var judgeCount = 0;
     for (var row = 1; row <= 8; row++) {
         for (var column = 1; column <= 8; column++) {
             document.querySelector('.boxes').insertAdjacentHTML('beforeend', '<div class="box" id="' + row + column + '"></div>');
@@ -78,18 +78,18 @@ window.onload = function () {
             var getId = e.target.getAttribute("id");
             var getRow = Number(getId) / 10 | 0;
             var getColumn = Number(getId) % 10;
-            setJudge = 0;
+            judgeCount = 0;
             var result = [];
             for (var ii = -1; ii <= 1; ii++) {
                 for (var jj = -1; jj <= 1; jj++) {
                     if (!(ii == 0 && jj == 0)) {
                         result = judge(getRow, getColumn, nowStone, ii, jj);
                         deprive(result);
-                        setJudge += result.length;
+                        judgeCount += result.length;
                     }
                 }
             }
-            if (setJudge > 0) {
+            if (judgeCount > 0) {
                 collection.add({
                     stones: nowStone,
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
@@ -131,14 +131,14 @@ window.onload = function () {
                 if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {
                     return;
                 }
-                setJudge = 0;
+                judgeCount = 0;
                 var result = [];
                 for (var ii = -1; ii <= 1; ii++) {
                     for (var jj = -1; jj <= 1; jj++) {
                         if (!(ii == 0 && jj == 0)) {
                             result = judge(pullRow, pullColumn, change.doc.data().stones, ii, jj);
                             deprive(result);
-                            setJudge += result.length;
+                            judgeCount += result.length;
                         }
                     }
                 }
@@ -226,12 +226,12 @@ var deprive = function (result) {
 };
 var canPut = function (nowStone) {
     var allConut = 0;
-    var setJudge = 0;
+    var judgeCount = 0;
     var result = [];
     for (var i = 1; i <= 8; i++) {
         for (var j = 1; j <= 8; j++) {
-            allConut += setJudge;
-            setJudge = 0;
+            allConut += judgeCount;
+            judgeCount = 0;
             result = [];
             var id = String(i) + String(j);
             document.getElementById(id).classList.remove('canPut');
@@ -239,14 +239,14 @@ var canPut = function (nowStone) {
                 for (var jj = -1; jj <= 1; jj++) {
                     if (!(ii == 0 && jj == 0)) {
                         result = judge(i, j, nowStone, ii, jj);
-                        setJudge += result.length;
+                        judgeCount += result.length;
                     }
                 }
             }
             if (document.getElementById(id).classList.contains('B') || document.getElementById(id).classList.contains('W')) {
-                setJudge = 0;
+                judgeCount = 0;
             }
-            if (setJudge > 0) {
+            if (judgeCount > 0) {
                 document.getElementById(id).classList.add('canPut');
             }
         }
@@ -254,7 +254,7 @@ var canPut = function (nowStone) {
     return allConut;
 };
 var removeCanPut = function () {
-    var setJudge = 0;
+    var judgeCount = 0;
     var result = [];
     for (var i = 1; i <= 8; i++) {
         for (var j = 1; j <= 8; j++) {

@@ -15,13 +15,13 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const collection = db.collection('gameRecord');
+const collection = db.collection('record');
 const collection_charenge = db.collection('challenges');
 
 const auth = firebase.auth();
 const batch = db.batch();
 var loginUser = null;
-var gameRecords = document.getElementById("gameRecords");
+var records = document.getElementById("records");
 
 document.getElementById('login').addEventListener('click', () => {
   auth.signInAnonymously();
@@ -39,7 +39,7 @@ auth.onAuthStateChanged(user => {
         if (change.type === 'added') {
           const li = document.createElement('li');
           li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().uid;
-          gameRecords.appendChild(li);
+          records.appendChild(li);
         }
       });
     });
@@ -48,7 +48,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById('logout').classList.remove('hidden');
     document.getElementById('reset').classList.remove('hidden');
     document.getElementById('boxes').classList.remove('hidden');
-    document.getElementById('gameRecords').classList.remove('hidden');
+    document.getElementById('records').classList.remove('hidden');
     return;
   }
   console.log("logout");
@@ -57,7 +57,7 @@ auth.onAuthStateChanged(user => {
   document.getElementById('logout').classList.add('hidden');
   document.getElementById('reset').classList.add('hidden');
   document.getElementById('boxes').classList.add('hidden');
-  document.getElementById('gameRecords').classList.add('hidden');
+  document.getElementById('records').classList.add('hidden');
 });
 
 interface ArrayConstructor {
