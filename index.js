@@ -126,7 +126,6 @@ window.onload = function () {
     collection.orderBy('created_at').onSnapshot(function (snapshot) {
         snapshot.docChanges().forEach(function (change) {
             if (change.type === 'added') {
-                // change.doc.data().id
                 var pullRow = Number(change.doc.data().id) / 10 | 0;
                 var pullColumn = Number(change.doc.data().id) % 10;
                 if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {

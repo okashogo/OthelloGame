@@ -21,7 +21,6 @@ const collection_charenge = db.collection('challenges');
 const auth = firebase.auth();
 const batch = db.batch();
 var loginUser = null;
-
 var gameRecords = document.getElementById("gameRecords");
 
 document.getElementById('login').addEventListener('click', () => {
@@ -68,7 +67,7 @@ interface ArrayConstructor {
 window.onload = () => {
 
   let nowStone: string = 'B';
-  var setJudge: number = 0
+  var judgeCount: number = 0
 
   for (let row = 1; row <= 8; row++) {
     for (let column = 1; column <= 8; column++) {
@@ -96,11 +95,11 @@ window.onload = () => {
         alert('すでに石がある場所には置けません。');
         return;
       }
-      let getId = e.target.getAttribute("id");
-      let getRow = Number(getId) / 10 | 0;
-      let getColumn = Number(getId) % 10;
+      let getId:string = e.target.getAttribute("id");
+      let getRow:number = Number(getId) / 10 | 0;
+      let getColumn:number = Number(getId) % 10;
 
-      setJudge = 0;
+      judgeCount = 0;
       var result: string[] = [];
 
       for (var ii = -1; ii <= 1; ii++) {
@@ -110,12 +109,12 @@ window.onload = () => {
 
             deprive(result);
 
-            setJudge += result.length;
+            judgeCount += result.length;
           }
         }
       }
 
-      if (setJudge > 0) {
+      if (judgeCount > 0) {
 
         collection.add({
           stones: nowStone,
@@ -159,7 +158,6 @@ window.onload = () => {
   collection.orderBy('created_at').onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
       if (change.type === 'added') {
-        // change.doc.data().id
         var pullRow: number = Number(change.doc.data().id) / 10 | 0;
         var pullColumn: number = Number(change.doc.data().id) % 10;
 
@@ -167,7 +165,7 @@ window.onload = () => {
           return;
         }
 
-        setJudge = 0;
+        judgeCount = 0;
         var result: string[] = [];
         for (var ii = -1; ii <= 1; ii++) {
           for (var jj = -1; jj <= 1; jj++) {
@@ -176,7 +174,7 @@ window.onload = () => {
 
               deprive(result);
 
-              setJudge += result.length;
+              judgeCount += result.length;
             }
           }
         }
@@ -226,7 +224,7 @@ const reverceStone = (nowStone) => {
   }
 }
 
-const changeStone = (id) => {
+const changeStone = function(id:string){
   if (document.getElementById(id).classList.contains('B')) {
     document.getElementById(id).classList.remove('B')
     document.getElementById(id).classList.add('W')
@@ -237,7 +235,7 @@ const changeStone = (id) => {
   }
 }
 
-const judge = (row, column, nowStone, ii, jj) => {
+const judge = function(row:number, column:number, nowStone:string, ii:number, jj:number): string[] {
   var rowShift: number = row;
   var columnShift: number = column;
   var jud: boolean = true;
@@ -264,20 +262,20 @@ const judge = (row, column, nowStone, ii, jj) => {
   return [];
 }
 
-const deprive = (result) => {
+const deprive = function(result: string[]) {
   for (var i = 0; i < result.length; i++) {
     changeStone(result[i]);
   }
 }
 
-const canPut = (nowStone) => {
-  var allConut = 0;
-  var setJudge = 0;
+const canPut = function(nowStone:string):number {
+  var allConut:number = 0;
+  var judgeCount:number = 0;
   var result: string[] = [];
   for (var i = 1; i <= 8; i++) {
     for (var j = 1; j <= 8; j++) {
-      allConut += setJudge;
-      setJudge = 0;
+      allConut += judgeCount;
+      judgeCount = 0;
       result = [];
       var id: string = String(i) + String(j);
       document.getElementById(id).classList.remove('canPut');
@@ -286,16 +284,16 @@ const canPut = (nowStone) => {
         for (var jj = -1; jj <= 1; jj++) {
           if (!(ii == 0 && jj == 0)) {
             result = judge(i, j, nowStone, ii, jj);
-            setJudge += result.length;
+            judgeCount += result.length;
           }
         }
       }
 
       if (document.getElementById(id).classList.contains('B') || document.getElementById(id).classList.contains('W')) {
-        setJudge = 0;
+        judgeCount = 0;
       }
 
-      if(setJudge > 0){
+      if(judgeCount > 0){
         document.getElementById(id).classList.add('canPut');
       }
 
@@ -304,8 +302,8 @@ const canPut = (nowStone) => {
   return allConut;
 }
 
-const removeCanPut = () => {
-  var setJudge = 0;
+const removeCanPut = function(){
+  var judgeCount:number = 0;
   var result: string[] = [];
   for (var i = 1; i <= 8; i++) {
     for (var j = 1; j <= 8; j++) {
