@@ -135,20 +135,22 @@ window.onload = () => {
         document.getElementById('enemyTurn').classList.remove('hidden');
         document.getElementById('yourTurn').classList.add('hidden');
 
-        if(canPut(nowStone) == 0){
-          document.getElementById('enemyTurn').classList.add('hidden');
-          document.getElementById('yourTurn').classList.remove('hidden');
-          nowStone = reverceStone(nowStone);
-          if(canPut(nowStone) == 0){
-            console.log("試合終了です。")
-          }
-        }
       }
       else {
         alert('ここには置けません。');
       }
 
-      removeCanPut();
+      if(canPut(nowStone) == 0){
+        document.getElementById('enemyTurn').classList.add('hidden');
+        document.getElementById('yourTurn').classList.remove('hidden');
+        nowStone = reverceStone(nowStone);
+        if(canPut(nowStone) == 0){
+          console.log("試合終了です。")
+        }
+      }
+      else{
+        removeCanPut();
+      }
     })
   })
 
@@ -185,7 +187,6 @@ window.onload = () => {
         if (loginUser.uid == change.doc.data().uid) {
           document.getElementById('yourTurn').classList.add('hidden');
           document.getElementById('enemyTurn').classList.remove('hidden');
-          removeCanPut();
           if(canPut(nowStone) == 0){
             document.getElementById('enemyTurn').classList.add('hidden');
             document.getElementById('yourTurn').classList.remove('hidden');
@@ -193,6 +194,9 @@ window.onload = () => {
             if(canPut(nowStone) == 0){
               console.log("試合終了です。")
             }
+          }
+          else{
+            removeCanPut();
           }
           return;
         }
