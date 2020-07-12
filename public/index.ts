@@ -35,6 +35,7 @@ const querySnapshot = collection.where('stones', '==', 'B').get()
 const auth = firebase.auth();
 const batch = db.batch();
 var loginUser = null;
+var enemyUser = null;
 var records = document.getElementById("records");
 var challenge_index = document.getElementById("challenge_index"); 
 
@@ -171,8 +172,10 @@ document.getElementById('submit_apply').addEventListener('click', () => {
                 document.getElementById('match_list').classList.remove('hidden');
                 document.getElementById('match_list').insertAdjacentHTML(
                   'afterbegin',
-                  '<p class="player1">' + doc.data().user_id + '</p> vs <p class="player2">' + loginUser.uid + '</p>',
+                  '<p class="player1">' + loginUser.uid + '</p> vs <p class="player2">' + doc.data().user_id + '</p>',
                 );
+                enemyUser = doc.data().user_id;
+                console.log('enemyUser: ' + enemyUser);
               })
               .catch(err => {
                 console.log('Not update!');
@@ -294,6 +297,9 @@ window.onload = () => {
           'afterbegin',
           '<p class="player1">' + change.doc.data().user_id + '</p> vs <p class="player2">' + change.doc.data().enemy_id + '</p>',
         );
+        document.getElementById('waiting').classList.add('hidden');
+        enemyUser = change.doc.data().enemy_id;
+        console.log('enemyUser: ' + enemyUser);
       }
     })
   });
@@ -301,7 +307,7 @@ window.onload = () => {
 
   collection.orderBy('created_at').onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
-      if (change.type === 'added') {
+      if (change.type === 'added' && (change.doc.data().uid == loginUser.uid || change.doc.data().uid == enemyUser )) {
         var pullRow: number = Number(change.doc.data().id) / 10 | 0;
         var pullColumn: number = Number(change.doc.data().id) % 10;
 

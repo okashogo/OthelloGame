@@ -29,6 +29,7 @@ var querySnapshot = collection.where('stones', '==', 'B').get()
 var auth = firebase.auth();
 var batch = db.batch();
 var loginUser = null;
+var enemyUser = null;
 var records = document.getElementById("records");
 var challenge_index = document.getElementById("challenge_index");
 document.getElementById('login').addEventListener('click', function () {
@@ -153,7 +154,9 @@ document.getElementById('submit_apply').addEventListener('click', function () {
                     .then(function (snapshot) {
                     console.log('update!');
                     document.getElementById('match_list').classList.remove('hidden');
-                    document.getElementById('match_list').insertAdjacentHTML('afterbegin', '<p class="player1">' + doc.data().user_id + '</p> vs <p class="player2">' + loginUser.uid + '</p>');
+                    document.getElementById('match_list').insertAdjacentHTML('afterbegin', '<p class="player1">' + loginUser.uid + '</p> vs <p class="player2">' + doc.data().user_id + '</p>');
+                    enemyUser = doc.data().user_id;
+                    console.log('enemyUser: ' + enemyUser);
                 })["catch"](function (err) {
                     console.log('Not update!');
                 });
@@ -245,13 +248,16 @@ window.onload = function () {
                 console.log(change.doc.data().enemy_id);
                 document.getElementById('match_list').classList.remove('hidden');
                 document.getElementById('match_list').insertAdjacentHTML('afterbegin', '<p class="player1">' + change.doc.data().user_id + '</p> vs <p class="player2">' + change.doc.data().enemy_id + '</p>');
+                document.getElementById('waiting').classList.add('hidden');
+                enemyUser = change.doc.data().enemy_id;
+                console.log('enemyUser: ' + enemyUser);
             }
         });
     });
     // DB に add されたら、それを反映させる。
     collection.orderBy('created_at').onSnapshot(function (snapshot) {
         snapshot.docChanges().forEach(function (change) {
-            if (change.type === 'added') {
+            if (change.type === 'added' && (change.doc.data().uid == loginUser.uid || change.doc.data().uid == enemyUser)) {
                 var pullRow = Number(change.doc.data().id) / 10 | 0;
                 var pullColumn = Number(change.doc.data().id) % 10;
                 if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {
