@@ -37,3 +37,7 @@
 .canPut {
   background-color: red;
 }
+
+.player1, .player2{
+  color: red;
+}

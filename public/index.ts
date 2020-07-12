@@ -16,7 +16,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const collection = db.collection('record');
-const collection_charenge = db.collection('challenges');
+const collection_challenge = db.collection('challenges');
 const querySnapshot = collection.where('stones', '==', 'B').get()
   .then(snapshot => {
     if (snapshot.empty) {
@@ -59,7 +59,7 @@ auth.onAuthStateChanged(user => {
       });
     });
     console.log("login:" + user.uid);
-    //collection_charenge.add({
+    //collection_challenge.add({
     //  user_id: user.uid,
     //  created_at: firebase.firestore.FieldValue.serverTimestamp(),
     //  status_flag: 0,
@@ -71,7 +71,7 @@ auth.onAuthStateChanged(user => {
     //  console.log(error);
     //})
     //const li = document.createElement('li');
-    //const querySnapshot = collection_charenge.where('status_flag', '==', 0).get()
+    //const querySnapshot = collection_challenge.where('status_flag', '==', 0).get()
     //    .then(snapshot => {
     //      if (snapshot.empty) {
     //       console.log('No matching documents.');
@@ -116,10 +116,12 @@ auth.onAuthStateChanged(user => {
 
 const element: HTMLInputElement =<HTMLInputElement>document.getElementById('input_challenge');
 const value: string = element.value;
+var my_challenge_id = null;
+
 document.getElementById('submit_challenge').addEventListener('click', () => {
   if(element.value){
     console.log(element.value);
-    collection_charenge.add({
+    collection_challenge.add({
       user_id: loginUser.uid,
       created_at: firebase.firestore.FieldValue.serverTimestamp(),
       enemy_id: 0,
@@ -127,6 +129,9 @@ document.getElementById('submit_challenge').addEventListener('click', () => {
     })
     .then(doc => {
       console.log(doc.id + ":add!");
+      my_challenge_id = doc.id;
+      //console.log("aaa:"+my_challenge_id);
+      document.getElementById('waiting').classList.remove('hidden');
     })
     .catch(error => {
       console.log(error);
@@ -136,12 +141,13 @@ document.getElementById('submit_challenge').addEventListener('click', () => {
     alert('３桁の数字を入力してください');
   }
 });
+
 const element_apply: HTMLInputElement =<HTMLInputElement>document.getElementById('input_apply');
 const value_apply: string = element_apply.value;
 document.getElementById('submit_apply').addEventListener('click', () => {
   if(element_apply.value){
     console.log(element_apply.value);
-    const querySnapshot = collection_charenge.where('enemy_id', '==', 0).where('pass', '==', element_apply.value).get()
+    const querySnapshot = collection_challenge.where('enemy_id', '==', 0).where('pass', '==', element_apply.value).get()
         .then(snapshot => {
           if (snapshot.empty) {
            console.log('No matching documents.');
@@ -152,7 +158,7 @@ document.getElementById('submit_apply').addEventListener('click', () => {
             console.log(doc.id, '=>', doc.data());
             console.log(doc.data().user_id);
 
-            collection_charenge.doc(doc.id)
+            collection_challenge.doc(doc.id)
               //.where('pass', '==', element_apply.value)
               .set({
                 user_id: doc.data().user_id,
@@ -165,7 +171,7 @@ document.getElementById('submit_apply').addEventListener('click', () => {
                 document.getElementById('match_list').classList.remove('hidden');
                 document.getElementById('match_list').insertAdjacentHTML(
                   'afterbegin',
-                  doc.data().user_id + ' vs ' + loginUser.uid,
+                  '<p class="player1">' + doc.data().user_id + '</p> vs <p class="player2">' + loginUser.uid + '</p>',
                 );
               })
               .catch(err => {
@@ -276,6 +282,21 @@ window.onload = () => {
     })
   })
 
+  // 挑戦状が申し込まれたら
+  collection_challenge.onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === 'modified' && my_challenge_id != null && change.doc.data().enemy_id != 0) {
+        console.log('applyed!!!');
+        console.log(change.doc.data().user_id);
+        console.log(change.doc.data().enemy_id);
+        document.getElementById('match_list').classList.remove('hidden');
+        document.getElementById('match_list').insertAdjacentHTML(
+          'afterbegin',
+          '<p class="player1">' + change.doc.data().user_id + '</p> vs <p class="player2">' + change.doc.data().enemy_id + '</p>',
+        );
+      }
+    })
+  });
   // DB に add されたら、それを反映させる。
 
   collection.orderBy('created_at').onSnapshot(snapshot => {
