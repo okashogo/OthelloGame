@@ -36,6 +36,7 @@ const auth = firebase.auth();
 const batch = db.batch();
 var loginUser = null;
 var records = document.getElementById("records");
+var challenge_index = document.getElementById("challenge_index"); 
 
 document.getElementById('login').addEventListener('click', () => {
   auth.signInAnonymously();
@@ -58,18 +59,42 @@ auth.onAuthStateChanged(user => {
       });
     });
     console.log("login:" + user.uid);
-    collection_charenge.add({
-      user_id: user.uid,
-      created_at: firebase.firestore.FieldValue.serverTimestamp(),
-      status_flag: 0,
-    })
-    .then(doc => {
-      console.log(doc.id + ":add!");
-    })
-    .catch(error => {
-      console.log(error);
-    })
+    //collection_charenge.add({
+    //  user_id: user.uid,
+    //  created_at: firebase.firestore.FieldValue.serverTimestamp(),
+    //  status_flag: 0,
+    //})
+    //.then(doc => {
+    //  console.log(doc.id + ":add!");
+    //})
+    //.catch(error => {
+    //  console.log(error);
+    //})
+    //const li = document.createElement('li');
+    //const querySnapshot = collection_charenge.where('status_flag', '==', 0).get()
+    //    .then(snapshot => {
+    //      if (snapshot.empty) {
+    //       console.log('No matching documents.');
+    //        return;
+    //      }
+//
+  //       snapshot.forEach(doc => {
+    //       li.textContent = doc.data().user_id;
+      //     challenge_index.appendChild(li);
+        //   console.log(doc.id, '=>', doc.data());
+       //  });
+     //   })
+     //   .catch(err => {
+     //       console.log('Error getting documents', err);
+     //   });
+    //li.textContent = 'aaaa';
+    //challenge_index.appendChild(li);
+      
     document.getElementById('login').classList.add('hidden');
+    document.getElementById('submit_challenge').classList.remove('hidden');
+    document.getElementById('challenge_index').classList.remove('hidden');
+    document.getElementById('submit_apply').classList.remove('hidden');
+    document.getElementById('yourTurn').classList.remove('hidden');
     document.getElementById('logout').classList.remove('hidden');
     document.getElementById('reset').classList.remove('hidden');
     document.getElementById('boxes').classList.remove('hidden');
@@ -79,10 +104,83 @@ auth.onAuthStateChanged(user => {
   console.log("logout");
   loginUser = null;
   document.getElementById('login').classList.remove('hidden');
+  document.getElementById('submit_challenge').classList.add('hidden');
+  document.getElementById('challenge_index').classList.add('hidden');
+  document.getElementById('submit_apply').classList.add('hidden');
+  document.getElementById('yourTurn').classList.add('hidden');
   document.getElementById('logout').classList.add('hidden');
   document.getElementById('reset').classList.add('hidden');
   document.getElementById('boxes').classList.add('hidden');
   document.getElementById('records').classList.add('hidden');
+});
+
+const element: HTMLInputElement =<HTMLInputElement>document.getElementById('input_challenge');
+const value: string = element.value;
+document.getElementById('submit_challenge').addEventListener('click', () => {
+  if(element.value){
+    console.log(element.value);
+    collection_charenge.add({
+      user_id: loginUser.uid,
+      created_at: firebase.firestore.FieldValue.serverTimestamp(),
+      enemy_id: 0,
+      pass: element.value,
+    })
+    .then(doc => {
+      console.log(doc.id + ":add!");
+    })
+    .catch(error => {
+      console.log(error);
+    })
+  }
+  else{
+    alert('３桁の数字を入力してください');
+  }
+});
+const element_apply: HTMLInputElement =<HTMLInputElement>document.getElementById('input_apply');
+const value_apply: string = element_apply.value;
+document.getElementById('submit_apply').addEventListener('click', () => {
+  if(element_apply.value){
+    console.log(element_apply.value);
+    const querySnapshot = collection_charenge.where('enemy_id', '==', 0).where('pass', '==', element_apply.value).get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+           console.log('No matching documents.');
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            console.log(doc.id, '=>', doc.data());
+            console.log(doc.data().user_id);
+
+            collection_charenge.doc(doc.id)
+              //.where('pass', '==', element_apply.value)
+              .set({
+                user_id: doc.data().user_id,
+                enemy_id: loginUser.uid,
+                pass: doc.data().pass,
+                created_at: doc.data().created_at,
+              })
+              .then(snapshot => {
+                console.log('update!');
+                document.getElementById('match_list').classList.remove('hidden');
+                document.getElementById('match_list').insertAdjacentHTML(
+                  'afterbegin',
+                  doc.data().user_id + ' vs ' + loginUser.uid,
+                );
+              })
+              .catch(err => {
+                console.log('Not update!');
+              });
+
+          });
+        })
+        .catch(err => {
+            console.log('Error getting documents', err);
+        });
+  }
+  else{
+    alert('３桁の数字を入力してください');
+  }
 });
 
 interface ArrayConstructor {
@@ -237,6 +335,8 @@ window.onload = () => {
       }
     });
   });
+
+
 }
 
 
@@ -338,3 +438,10 @@ const removeCanPut = function(){
     }
   }
 }
+
+
+
+//window.onbeforeunload = function(e) {
+//    var message = "ページを離れようとしています。よろしいですか？";
+//    e.returnValue = message;
+//}

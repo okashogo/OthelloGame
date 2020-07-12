@@ -10,7 +10,16 @@
   </head>
   <body>
     <h1>オセロ</h1>
-    <h3 id="yourTurn">あなたの番です</h3>
+    <form id="form_challenge" action="#">
+      <input id="input_challenge">
+      <button id="submit_challenge" class="hidden">挑戦状を出す</button>
+    </form>
+    <div id="challenge_index" class="hidden"></div>
+    <input id="input_apply">
+    <button id="submit_apply" class="hidden">申し込む</button>
+    <h3 id="waiting" class="hidden">挑戦者を探しています。。。</h3>
+    <h3 id="match_list" class="hidden"></h3>
+    <h3 id="yourTurn" class="hidden">あなたの番です</h3>
     <h3 id="enemyTurn" class="hidden">相手の番です<h3>
     <button id="login">ログイン</button>
     <button id="logout" class="hidden">ログアウト</button>
