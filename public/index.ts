@@ -95,11 +95,10 @@ auth.onAuthStateChanged(user => {
     document.getElementById('submit_challenge').classList.remove('hidden');
     document.getElementById('challenge_index').classList.remove('hidden');
     document.getElementById('submit_apply').classList.remove('hidden');
-    document.getElementById('yourTurn').classList.remove('hidden');
+    //document.getElementById('yourTurn').classList.remove('hidden');
     document.getElementById('logout').classList.remove('hidden');
-    document.getElementById('reset').classList.remove('hidden');
-    document.getElementById('boxes').classList.remove('hidden');
-    document.getElementById('records').classList.remove('hidden');
+    //document.getElementById('boxes').classList.remove('hidden');
+    //document.getElementById('records').classList.remove('hidden');
     return;
   }
   console.log("logout");
@@ -108,9 +107,8 @@ auth.onAuthStateChanged(user => {
   document.getElementById('submit_challenge').classList.add('hidden');
   document.getElementById('challenge_index').classList.add('hidden');
   document.getElementById('submit_apply').classList.add('hidden');
-  document.getElementById('yourTurn').classList.add('hidden');
   document.getElementById('logout').classList.add('hidden');
-  document.getElementById('reset').classList.add('hidden');
+  document.getElementById('yourTurn').classList.add('hidden');
   document.getElementById('boxes').classList.add('hidden');
   document.getElementById('records').classList.add('hidden');
 });
@@ -176,6 +174,9 @@ document.getElementById('submit_apply').addEventListener('click', () => {
                 );
                 enemyUser = doc.data().user_id;
                 console.log('enemyUser: ' + enemyUser);
+                document.getElementById('yourTurn').classList.remove('hidden');
+                document.getElementById('boxes').classList.remove('hidden');
+                document.getElementById('records').classList.remove('hidden');
               })
               .catch(err => {
                 console.log('Not update!');
@@ -300,6 +301,9 @@ window.onload = () => {
         document.getElementById('waiting').classList.add('hidden');
         enemyUser = change.doc.data().enemy_id;
         console.log('enemyUser: ' + enemyUser);
+        document.getElementById('yourTurn').classList.remove('hidden');
+        document.getElementById('boxes').classList.remove('hidden');
+        document.getElementById('records').classList.remove('hidden');
       }
     })
   });
