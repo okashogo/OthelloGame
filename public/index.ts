@@ -38,9 +38,24 @@ var loginUser = null;
 var enemyUser = null;
 var records = document.getElementById("records");
 var challenge_index = document.getElementById("challenge_index"); 
+var nickname: string = null; 
+const element_nickname: HTMLInputElement =<HTMLInputElement>document.getElementById('input_nickname');
 
 document.getElementById('login').addEventListener('click', () => {
   auth.signInAnonymously();
+  if(element_nickname.value){
+    console.log(element_nickname.value);
+    document.getElementById('input_nickname').classList.add('hidden');
+    document.getElementById('nickname_message').insertAdjacentHTML(
+       'afterbegin',
+       'ようこそ、<b id="nickname">'+ element_nickname.value +'<b>さん',
+    );
+    nickname = element_nickname.value;
+    document.getElementById('nickname_message').classList.remove('hidden');
+  }
+  else{
+    alert('ニックネームを入力してください');
+  }
 });
 
 document.getElementById('logout').addEventListener('click', () => {
@@ -134,6 +149,8 @@ document.getElementById('submit_challenge').addEventListener('click', () => {
       created_at: firebase.firestore.FieldValue.serverTimestamp(),
       enemy_id: 0,
       pass: element.value,
+      challenge_nickname: nickname,
+      apply_nickname: "nobody",
     })
     .then(doc => {
       console.log(doc.id + ":add!");
@@ -178,13 +195,15 @@ document.getElementById('submit_apply').addEventListener('click', () => {
                 enemy_id: loginUser.uid,
                 pass: doc.data().pass,
                 created_at: doc.data().created_at,
+                challenge_nickname: doc.data().challenge_nickname,
+                apply_nickname: nickname,
               })
               .then(snapshot => {
                 console.log('update!');
                 document.getElementById('match_list').classList.remove('hidden');
                 document.getElementById('match_list').insertAdjacentHTML(
                   'afterbegin',
-                  '<p class="player1">' + loginUser.uid + '</p> vs <p class="player2">' + doc.data().user_id + '</p>',
+                  '<b class="player1">' + nickname + '</b> vs <b class="player2">' + doc.data().challenge_nickname + '</b>',
                 );
                 enemyUser = doc.data().user_id;
                 console.log('enemyUser: ' + enemyUser);
@@ -314,7 +333,7 @@ window.onload = () => {
         document.getElementById('match_list').classList.remove('hidden');
         document.getElementById('match_list').insertAdjacentHTML(
           'afterbegin',
-          '<p class="player1">' + change.doc.data().user_id + '</p> vs <p class="player2">' + change.doc.data().enemy_id + '</p>',
+          '<b class="player1">' + nickname + '</b> vs <b class="player2">' + change.doc.data().apply_nickname + '</b>',
         );
         document.getElementById('waiting').classList.add('hidden');
         enemyUser = change.doc.data().enemy_id;
