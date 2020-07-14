@@ -124,6 +124,10 @@ document.getElementById('submit_challenge').addEventListener('click', function (
             my_challenge_id = doc.id;
             //console.log("aaa:"+my_challenge_id);
             document.getElementById('waiting').classList.remove('hidden');
+            document.getElementById('input_challenge').classList.add('hidden');
+            document.getElementById('submit_challenge').classList.add('hidden');
+            document.getElementById('input_apply').classList.add('hidden');
+            document.getElementById('submit_apply').classList.add('hidden');
         })["catch"](function (error) {
             console.log(error);
         });
@@ -134,6 +138,7 @@ document.getElementById('submit_challenge').addEventListener('click', function (
 });
 var element_apply = document.getElementById('input_apply');
 var value_apply = element_apply.value;
+//　申し込みをした時の処理
 document.getElementById('submit_apply').addEventListener('click', function () {
     if (element_apply.value) {
         console.log(element_apply.value);
@@ -163,6 +168,10 @@ document.getElementById('submit_apply').addEventListener('click', function () {
                     document.getElementById('yourTurn').classList.remove('hidden');
                     document.getElementById('boxes').classList.remove('hidden');
                     document.getElementById('records').classList.remove('hidden');
+                    document.getElementById('input_challenge').classList.add('hidden');
+                    document.getElementById('submit_challenge').classList.add('hidden');
+                    document.getElementById('input_apply').classList.add('hidden');
+                    document.getElementById('submit_apply').classList.add('hidden');
                 })["catch"](function (err) {
                     console.log('Not update!');
                 });

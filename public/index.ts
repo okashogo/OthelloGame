@@ -136,6 +136,10 @@ document.getElementById('submit_challenge').addEventListener('click', () => {
       my_challenge_id = doc.id;
       //console.log("aaa:"+my_challenge_id);
       document.getElementById('waiting').classList.remove('hidden');
+      document.getElementById('input_challenge').classList.add('hidden');
+      document.getElementById('submit_challenge').classList.add('hidden');
+      document.getElementById('input_apply').classList.add('hidden');
+      document.getElementById('submit_apply').classList.add('hidden');
     })
     .catch(error => {
       console.log(error);
@@ -148,6 +152,7 @@ document.getElementById('submit_challenge').addEventListener('click', () => {
 
 const element_apply: HTMLInputElement =<HTMLInputElement>document.getElementById('input_apply');
 const value_apply: string = element_apply.value;
+//　申し込みをした時の処理
 document.getElementById('submit_apply').addEventListener('click', () => {
   if(element_apply.value){
     console.log(element_apply.value);
@@ -182,6 +187,10 @@ document.getElementById('submit_apply').addEventListener('click', () => {
                 document.getElementById('yourTurn').classList.remove('hidden');
                 document.getElementById('boxes').classList.remove('hidden');
                 document.getElementById('records').classList.remove('hidden');
+                document.getElementById('input_challenge').classList.add('hidden');
+                document.getElementById('submit_challenge').classList.add('hidden');
+                document.getElementById('input_apply').classList.add('hidden');
+                document.getElementById('submit_apply').classList.add('hidden');
               })
               .catch(err => {
                 console.log('Not update!');
