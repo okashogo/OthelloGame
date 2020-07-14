@@ -105,6 +105,18 @@ auth.onAuthStateChanged(function (user) {
     document.getElementById('records').classList.add('hidden');
     document.getElementById('input_challenge').classList.add('hidden');
     document.getElementById('input_apply').classList.add('hidden');
+    document.getElementById('match_list').classList.add('hidden');
+    //試合中の場合
+    if (document.getElementById('yourTurn').classList.contains('hidden')) {
+        if (document.getElementById('yourTurn').classList.contains('hidden')) {
+            document.getElementById('enemyTurn').classList.add('hidden');
+        }
+        else {
+            document.getElementById('yourTurn').classList.add('hidden');
+        }
+    }
+    else { // 試合中でない場合
+    }
 });
 var element = document.getElementById('input_challenge');
 var value = element.value;

@@ -115,6 +115,10 @@ auth.onAuthStateChanged(user => {
   document.getElementById('records').classList.add('hidden');
   document.getElementById('input_challenge').classList.add('hidden');
   document.getElementById('input_apply').classList.add('hidden');
+  document.getElementById('match_list').classList.add('hidden'); 
+  document.getElementById('enemyTurn').classList.add('hidden');
+  document.getElementById('yourTurn').classList.add('hidden');
+
 });
 
 const element: HTMLInputElement =<HTMLInputElement>document.getElementById('input_challenge');
