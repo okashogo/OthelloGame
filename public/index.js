@@ -39,6 +39,7 @@ document.getElementById('logout').addEventListener('click', function () {
     auth.signOut();
 });
 auth.onAuthStateChanged(function (user) {
+    // ログイン時の処理
     if (user) {
         loginUser = user;
         collection.orderBy('created_at').onSnapshot(function (snapshot) {
@@ -85,12 +86,13 @@ auth.onAuthStateChanged(function (user) {
         document.getElementById('submit_challenge').classList.remove('hidden');
         document.getElementById('challenge_index').classList.remove('hidden');
         document.getElementById('submit_apply').classList.remove('hidden');
-        //document.getElementById('yourTurn').classList.remove('hidden');
+        document.getElementById('input_challenge').classList.remove('hidden');
         document.getElementById('logout').classList.remove('hidden');
-        //document.getElementById('boxes').classList.remove('hidden');
+        document.getElementById('input_apply').classList.remove('hidden');
         //document.getElementById('records').classList.remove('hidden');
         return;
     }
+    //ログアウト時の処理
     console.log("logout");
     loginUser = null;
     document.getElementById('login').classList.remove('hidden');
@@ -101,10 +103,13 @@ auth.onAuthStateChanged(function (user) {
     document.getElementById('yourTurn').classList.add('hidden');
     document.getElementById('boxes').classList.add('hidden');
     document.getElementById('records').classList.add('hidden');
+    document.getElementById('input_challenge').classList.add('hidden');
+    document.getElementById('input_apply').classList.add('hidden');
 });
 var element = document.getElementById('input_challenge');
 var value = element.value;
 var my_challenge_id = null;
+// 挑戦状ボタンを押したとき
 document.getElementById('submit_challenge').addEventListener('click', function () {
     if (element.value) {
         console.log(element.value);
