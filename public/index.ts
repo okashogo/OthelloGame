@@ -310,57 +310,59 @@ window.onload = () => {
 
   collection.orderBy('created_at').onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
-      if (change.type === 'added' && (change.doc.data().uid == loginUser.uid || change.doc.data().uid == enemyUser )) {
-        var pullRow: number = Number(change.doc.data().id) / 10 | 0;
-        var pullColumn: number = Number(change.doc.data().id) % 10;
+      if(loginUser != null){
+        if (change.type === 'added' && (change.doc.data().uid == loginUser.uid || change.doc.data().uid == enemyUser )) {
+          var pullRow: number = Number(change.doc.data().id) / 10 | 0;
+          var pullColumn: number = Number(change.doc.data().id) % 10;
 
-        if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {
-          return;
-        }
+          if (document.getElementById(change.doc.data().id).classList.contains('B') || document.getElementById(change.doc.data().id).classList.contains('W')) {
+            return;
+          } 
 
-        judgeCount = 0;
-        var result: string[] = [];
-        for (var ii = -1; ii <= 1; ii++) {
-          for (var jj = -1; jj <= 1; jj++) {
-            if (!(ii == 0 && jj == 0)) {
-              result = judge(pullRow, pullColumn, change.doc.data().stones, ii, jj);
+          judgeCount = 0;
+          var result: string[] = [];
+          for (var ii = -1; ii <= 1; ii++) {
+           for (var jj = -1; jj <= 1; jj++) {
+              if (!(ii == 0 && jj == 0)) {
+                result = judge(pullRow, pullColumn, change.doc.data().stones, ii, jj);
 
-              deprive(result);
+                deprive(result);
 
-              judgeCount += result.length;
+                judgeCount += result.length;
+             }
             }
           }
-        }
 
-        document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
-        nowStone = reverceStone(nowStone);
+          document.getElementById(change.doc.data().id).classList.add(change.doc.data().stones);
+          nowStone = reverceStone(nowStone);
 
-        if (loginUser.uid == change.doc.data().uid) {
-          document.getElementById('yourTurn').classList.add('hidden');
-          document.getElementById('enemyTurn').classList.remove('hidden');
-          if(canPut(nowStone) == 0){
-            document.getElementById('enemyTurn').classList.add('hidden');
-            document.getElementById('yourTurn').classList.remove('hidden');
-            nowStone = reverceStone(nowStone);
-            if(canPut(nowStone) == 0){
-              console.log("試合終了です。")
-            }
-          }
-          else{
-            removeCanPut();
-          }
-          return;
-        }
-        else {
-          document.getElementById('enemyTurn').classList.add('hidden');
-          document.getElementById('yourTurn').classList.remove('hidden');
-          if(canPut(nowStone) == 0){
-            alert('あなたはパスです。');
-            nowStone = reverceStone(nowStone);
+          if (loginUser.uid == change.doc.data().uid) {
             document.getElementById('yourTurn').classList.add('hidden');
             document.getElementById('enemyTurn').classList.remove('hidden');
+            if(canPut(nowStone) == 0){
+              document.getElementById('enemyTurn').classList.add('hidden');
+              document.getElementById('yourTurn').classList.remove('hidden');
+              nowStone = reverceStone(nowStone);
+              if(canPut(nowStone) == 0){
+                console.log("試合終了です。")
+              }
+            }
+            else{
+              removeCanPut();
+            }
+            return;
           }
-          return;
+          else {
+            document.getElementById('enemyTurn').classList.add('hidden');
+            document.getElementById('yourTurn').classList.remove('hidden');
+            if(canPut(nowStone) == 0){
+              alert('あなたはパスです。');
+              nowStone = reverceStone(nowStone);
+              document.getElementById('yourTurn').classList.add('hidden');
+              document.getElementById('enemyTurn').classList.remove('hidden');
+            }
+            return;
+          }
         }
       }
     });
