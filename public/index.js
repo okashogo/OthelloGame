@@ -38,7 +38,7 @@ document.getElementById('login').addEventListener('click', function () {
         auth.signInAnonymously();
         console.log(element_nickname.value);
         document.getElementById('input_nickname').classList.add('hidden');
-        document.getElementById('nickname_message').insertAdjacentHTML('afterbegin', 'ようこそ、<b id="nickname">' + element_nickname.value + '<b>さん');
+        document.getElementById('nickname_message').innerHTML = 'ようこそ、<b id="nickname">' + element_nickname.value + '<b>さん';
         nickname = element_nickname.value;
         document.getElementById('nickname_message').classList.remove('hidden');
     }
@@ -52,7 +52,12 @@ document.getElementById('logout').addEventListener('click', function () {
 auth.onAuthStateChanged(function (user) {
     // ログイン時の処理
     if (user) {
+        if (nickname == null) {
+            document.getElementById('nickname_message').classList.add('hidden');
+            auth.signOut();
+        }
         loginUser = user;
+        console.log("aaa");
         console.log("login:" + user.uid);
         document.getElementById('login').classList.add('hidden');
         document.getElementById('submit_challenge').classList.remove('hidden');
@@ -66,6 +71,8 @@ auth.onAuthStateChanged(function (user) {
     //ログアウト時の処理
     console.log("logout");
     loginUser = null;
+    document.getElementById('input_nickname').classList.remove('hidden');
+    document.getElementById('nickname_message').classList.add('hidden');
     document.getElementById('login').classList.remove('hidden');
     document.getElementById('submit_challenge').classList.add('hidden');
     document.getElementById('challenge_index').classList.add('hidden');
@@ -124,8 +131,6 @@ document.getElementById('submit_apply').addEventListener('click', function () {
                 return;
             }
             snapshot.forEach(function (doc) {
-                console.log(doc.id, '=>', doc.data());
-                console.log(doc.data().user_id);
                 collection_challenge.doc(doc.id)
                     //.where('pass', '==', element_apply.value)
                     .set({
