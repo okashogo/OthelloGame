@@ -283,6 +283,10 @@ window.onload = function () {
                 document.getElementById('match_list').classList.remove('hidden');
                 document.getElementById('match_list').insertAdjacentHTML('afterbegin', '<b class="player1">' + nickname + '</b> vs <b class="player2">' + change.doc.data().apply_nickname + '</b>');
                 document.getElementById('waiting').classList.add('hidden');
+                document.getElementById('input_challenge').classList.add('hidden');
+                document.getElementById('submit_challenge').classList.add('hidden');
+                document.getElementById('input_apply').classList.add('hidden');
+                document.getElementById('submit_apply').classList.add('hidden');
                 enemyUser = change.doc.data().enemy_id;
                 console.log('enemyUser: ' + enemyUser);
                 document.getElementById('yourTurn').classList.remove('hidden');
