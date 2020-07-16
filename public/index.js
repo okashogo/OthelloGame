@@ -30,13 +30,12 @@ var auth = firebase.auth();
 var batch = db.batch();
 var loginUser = null;
 var enemyUser = null;
-var records = document.getElementById("records");
 var challenge_index = document.getElementById("challenge_index");
 var nickname = null;
 var element_nickname = document.getElementById('input_nickname');
 document.getElementById('login').addEventListener('click', function () {
-    auth.signInAnonymously();
     if (element_nickname.value) {
+        auth.signInAnonymously();
         console.log(element_nickname.value);
         document.getElementById('input_nickname').classList.add('hidden');
         document.getElementById('nickname_message').insertAdjacentHTML('afterbegin', 'ようこそ、<b id="nickname">' + element_nickname.value + '<b>さん');
@@ -54,46 +53,7 @@ auth.onAuthStateChanged(function (user) {
     // ログイン時の処理
     if (user) {
         loginUser = user;
-        collection.orderBy('created_at').onSnapshot(function (snapshot) {
-            snapshot.docChanges().forEach(function (change) {
-                if (change.type === 'added') {
-                    var li = document.createElement('li');
-                    li.textContent = change.doc.data().id + ' ' + change.doc.data().stones + ' ' + change.doc.data().uid;
-                    records.appendChild(li);
-                }
-            });
-        });
         console.log("login:" + user.uid);
-        //collection_challenge.add({
-        //  user_id: user.uid,
-        //  created_at: firebase.firestore.FieldValue.serverTimestamp(),
-        //  status_flag: 0,
-        //})
-        //.then(doc => {
-        //  console.log(doc.id + ":add!");
-        //})
-        //.catch(error => {
-        //  console.log(error);
-        //})
-        //const li = document.createElement('li');
-        //const querySnapshot = collection_challenge.where('status_flag', '==', 0).get()
-        //    .then(snapshot => {
-        //      if (snapshot.empty) {
-        //       console.log('No matching documents.');
-        //        return;
-        //      }
-        //
-        //       snapshot.forEach(doc => {
-        //       li.textContent = doc.data().user_id;
-        //     challenge_index.appendChild(li);
-        //   console.log(doc.id, '=>', doc.data());
-        //  });
-        //   })
-        //   .catch(err => {
-        //       console.log('Error getting documents', err);
-        //   });
-        //li.textContent = 'aaaa';
-        //challenge_index.appendChild(li);
         document.getElementById('login').classList.add('hidden');
         document.getElementById('submit_challenge').classList.remove('hidden');
         document.getElementById('challenge_index').classList.remove('hidden');
@@ -101,7 +61,6 @@ auth.onAuthStateChanged(function (user) {
         document.getElementById('input_challenge').classList.remove('hidden');
         document.getElementById('logout').classList.remove('hidden');
         document.getElementById('input_apply').classList.remove('hidden');
-        //document.getElementById('records').classList.remove('hidden');
         return;
     }
     //ログアウト時の処理
@@ -114,7 +73,6 @@ auth.onAuthStateChanged(function (user) {
     document.getElementById('logout').classList.add('hidden');
     document.getElementById('yourTurn').classList.add('hidden');
     document.getElementById('boxes').classList.add('hidden');
-    document.getElementById('records').classList.add('hidden');
     document.getElementById('input_challenge').classList.add('hidden');
     document.getElementById('input_apply').classList.add('hidden');
     document.getElementById('match_list').classList.add('hidden');
@@ -150,7 +108,7 @@ document.getElementById('submit_challenge').addEventListener('click', function (
         });
     }
     else {
-        alert('３桁の数字を入力してください');
+        alert('数字を入力してください');
     }
 });
 var element_apply = document.getElementById('input_apply');
@@ -186,7 +144,6 @@ document.getElementById('submit_apply').addEventListener('click', function () {
                     console.log('enemyUser: ' + enemyUser);
                     document.getElementById('yourTurn').classList.remove('hidden');
                     document.getElementById('boxes').classList.remove('hidden');
-                    document.getElementById('records').classList.remove('hidden');
                     document.getElementById('input_challenge').classList.add('hidden');
                     document.getElementById('submit_challenge').classList.add('hidden');
                     document.getElementById('input_apply').classList.add('hidden');
@@ -200,7 +157,7 @@ document.getElementById('submit_apply').addEventListener('click', function () {
         });
     }
     else {
-        alert('３桁の数字を入力してください');
+        alert('数字を入力してください');
     }
 });
 window.onload = function () {
@@ -291,7 +248,6 @@ window.onload = function () {
                 console.log('enemyUser: ' + enemyUser);
                 document.getElementById('yourTurn').classList.remove('hidden');
                 document.getElementById('boxes').classList.remove('hidden');
-                document.getElementById('records').classList.remove('hidden');
             }
         });
     });
